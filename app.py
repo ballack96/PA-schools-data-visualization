@@ -16,7 +16,7 @@ data = pd.read_csv(file_name)
 
 # Define the layout
 app.layout = html.Div([
-    html.H1("Schools in PA"),
+    html.H1("Schools in PA", id='title'),
     dcc.Dropdown(
         id='category-dropdown',
         options=[{'label': cat, 'value': cat} for cat in data['category'].unique()],

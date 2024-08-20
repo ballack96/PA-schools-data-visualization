@@ -9,6 +9,11 @@ h1 {
     text-align: center;
 }
 
+#title {
+    color: #007bff;
+    text-align: center;
+}
+
 #category-dropdown, #county-dropdown {
     width: 50%;
     margin: 0 auto;
