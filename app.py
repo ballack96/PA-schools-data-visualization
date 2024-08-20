@@ -6,37 +6,58 @@ import requests
 import plotly.express as px
 
 
-# Fetch the data
-url = "https://data.pa.gov/resource/dtvt-jb9p.json"
-response = requests.get(url)
-if response.status_code == 200:
-    data = pd.DataFrame(response.json())
-else:
-    print(f"Failed to fetch data. Status code: {response.status_code}")
-    data = pd.DataFrame()  # Create an empty DataFrame if the request fails
-
 # Initialize the Dash app
 app = dash.Dash(__name__)
 
+# Import the dataset
+file_name = 'pa-school-direcotory.csv'
+data = pd.read_csv(file_name)
 
-# Define the app layout
+
+# Define the layout
 app.layout = html.Div([
-    html.H1("PA Data Visualization"),
+    html.H1("Schools in PA"),
     dcc.Dropdown(
-        id='dropdown',
-        options=[{'label': col, 'value': col} for col in data.columns],
-        value=data.columns[0]  # Default value
+        id='category-dropdown',
+        options=[{'label': cat, 'value': cat} for cat in data['category'].unique()],
+        placeholder="Select Category"
     ),
-    dcc.Graph(id='line-chart')
+    dcc.Dropdown(
+        id='county-dropdown',
+        placeholder="Select County"
+    ),
+    dcc.Graph(id='map')
 ])
 
-# Define the callback to update the graph based on the selected dropdown value
+# Callback to update county dropdown based on category
 @app.callback(
-    Output('line-chart', 'figure'),
-    [Input('dropdown', 'value')]
+    Output('county-dropdown', 'options'),
+    Input('category-dropdown', 'value')
 )
-def update_chart(selected_column):
-    fig = px.line(data, x=data.index, y=selected_column, title=f'Line Chart of {selected_column}')
+def set_county_options(selected_category):
+    filtered_data = data[data['category'] == selected_category]
+    return [{'label': county, 'value': county} for county in filtered_data['county'].unique()]
+
+# Callback to update map based on selected filters
+@app.callback(
+    Output('map', 'figure'),
+    [Input('category-dropdown', 'value'),
+     Input('county-dropdown', 'value')]
+)
+def update_map(selected_category, selected_county):
+    filtered_data = data.copy()
+    if selected_category:
+        filtered_data = filtered_data[filtered_data['category'] == selected_category]
+    if selected_county:
+        filtered_data = filtered_data[filtered_data['county'] == selected_county]
+
+    fig = px.scatter_mapbox(filtered_data,
+                            lat="latitude", lon="longitude",
+                            hover_name="institution_name",
+                            hover_data=["city", "county"],
+                            zoom=6, height=750)
+
+    fig.update_layout(mapbox_style="open-street-map")
     return fig
 
 # Run the app
