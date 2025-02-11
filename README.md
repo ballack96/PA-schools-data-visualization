@@ -62,7 +62,6 @@ The dashboard is run using a Python script(activate your virtual environment if 
 ```
   PA-schools-data-visualization/
   ├── data_processing.ipynb     # Jupyter Notebook for data processing
-  ├── [name of CSV file].csv    # Raw data source
   ├── [name of output data file].csv # Processed data used by the dashboard
   ├── app.py             # Python script for running the Plotly dashboard
   ├── requirements.txt         # List of required Python packages
